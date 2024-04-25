@@ -45,7 +45,7 @@ comprasCtrl.searchZapatos = async (req, res) => {
             const zapato = await Zapato.find({tipo : req.params.value});
             res.send(zapato);
         } else if(req.params.param == "talla") {
-            const curTalla = int(req.params.value);
+            const curTalla = Number(req.params.value);
             const zapato = await Zapato.find({talla : curTalla});
             res.send(zapato);
         } else if(req.params.param == "id") {
