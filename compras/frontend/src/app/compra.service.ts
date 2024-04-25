@@ -15,16 +15,16 @@ export class CompraService {
   compra$ = signal<Compra>({} as Compra);
   zapatos$ = signal<Zapato[]>([]);
 
-  getZapatos() {
-    this.httpClient.get<Zapato[]>(`${this.url}/zapatos`)
+  getZapatos(id: string) {
+    this.httpClient.get<Zapato[]>(`${this.url}/zapatos/${id}`)
     .subscribe(zapatos => {
       this.zapatos$.set(zapatos);
     });
     return this.zapatos$();
   }
 
-  searchZapatos(param: string, value: string) {
-    this.httpClient.get<Zapato[]>(`${this.url}/zapatos/${param}/${value}`)
+  searchZapatos(id: string, param: string, value: string) {
+    this.httpClient.get<Zapato[]>(`${this.url}/zapatos/${id}/${param}/${value}`)
     .subscribe(zapatos => {
       this.zapatos$.set(zapatos);
       return this.zapatos$();

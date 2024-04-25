@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, Output, OnInit, WritableSignal  } from '@angular/core';
+import { Component, effect, WritableSignal  } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -130,28 +130,22 @@ import { Zapato } from '../zapato'
     }
   `
 })
-export class ArticulosBlockComponent implements OnInit{
+export class ArticulosBlockComponent {
 
   zapatos$ = {} as WritableSignal<Zapato[]>;
 
-  @Output() idCompra = new EventEmitter<string>();
-
-  ngOnInit() {
-    this.fetchZapatos();
-  }
-
   private fetchZapatos(): void {
     this.zapatos$ = this.compraService.zapatos$;
-    this.compraService.getZapatos();
+    this.compraService.getZapatos("SAMPLE_ID");
   }
 
-  comprarZapato(id: string): void {
-    this.idCompra.emit(id);
+  comprarZapato(id: string) {
+
   }
 
   submitForm() {
     this.zapatos$ = this.compraService.zapatos$;
-    this.compraService.searchZapatos(this.searchBy.value||'', this.search.value||'');
+    this.compraService.searchZapatos("SAMPLE_ID",this.searchBy.value||'', this.search.value||'');
   }
 
   displayedColumns: string[] = [
