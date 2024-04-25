@@ -49,7 +49,7 @@ export class ZapatoService {
 	}
 
 	putZapato(zapato : Zapato){
-		return this.http.put(this.URL_API+"/"+zapato._id,zapato);
+		return this.http.put(this.URL_API+"/"+zapato._id, zapato);
 	}
 
 	deleteZapato(_id: string){

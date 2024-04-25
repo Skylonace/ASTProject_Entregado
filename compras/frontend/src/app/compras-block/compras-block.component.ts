@@ -7,7 +7,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { FormBuilder, Validators, ReactiveFormsModule, FormsModule, FormControl} from '@angular/forms';
 import { MatDividerModule } from '@angular/material/divider';
 import { CompraService } from '../compra.service';
+import { SharedService } from '../shared.service'
 import { Compra } from '../compra';
+import { NONE_TYPE } from '@angular/compiler';
 
 @Component({
   selector: 'app-compras-block',
@@ -80,6 +82,13 @@ import { Compra } from '../compra';
         Enviar
       </button>
     </form>
+    <button
+        mat-raised-button
+        color="primary"
+        (click)="clear()"
+      >
+        Limpiar
+      </button>
   <mat-divider></mat-divider>
   <form
       class="compras-forms"
@@ -98,7 +107,6 @@ import { Compra } from '../compra';
         <mat-label>Buscar por</mat-label>
         <select matNativeControl formControlName="searchBy" required>
           <option value="id_articulo">ID Articulo</option>
-          <option value="id_cliente">ID Cliente</option>
           <option value="nombre">Nombre</option>
           <option value="direccion">Dirección</option>
           <option value="id">ID</option>
@@ -213,15 +221,26 @@ import { Compra } from '../compra';
 export class ComprasBlockComponent implements OnInit{
 
   compras$ = {} as WritableSignal<Compra[]>;
-  compra$ = {} as WritableSignal<Compra>;
 
   buscarTodos() {
     this.compras$ = this.comprasService.compras$;
     this.comprasService.getCompras(this.userId.value || '');
   }
 
+  setProduct(id: string) {
+    this.nuevaCompraForm.controls['idArticulo'].setValue(id);
+  }
+
   ngOnInit() {
     this.compras$ = this.comprasService.compras$;
+    this.sharedService.idProductMessage.subscribe(
+      (id) => {this.setProduct(id);}
+    );
+    this.userId.valueChanges.subscribe(
+      (value) => {
+        this.sharedService.setUserId(value || '');
+      }
+    )
   }
   
   submitCompraForm() {
@@ -233,9 +252,15 @@ export class ComprasBlockComponent implements OnInit{
       direccion: this.direccion.value || '',
     };
     if(this.id.value != '') {
-      this.comprasService.updateCompra(nuevaCompra.id_cliente, this.id.value || '', nuevaCompra)
+      this.comprasService.updateCompra(nuevaCompra.id_cliente, this.id.value || '', nuevaCompra).subscribe((res) => {
+        this.buscarTodos();
+        this.clear();
+      });
     } else {
-      this.comprasService.createCompra(nuevaCompra.id_cliente, nuevaCompra);
+      this.comprasService.createCompra(nuevaCompra.id_cliente, nuevaCompra).subscribe((res) => {
+        this.buscarTodos();
+        this.clear();
+      });
     }
   }
 
@@ -245,18 +270,24 @@ export class ComprasBlockComponent implements OnInit{
   }
 
   borrarCompra(idCompra: string) {
-    this.comprasService.deleteCompra(this.userId.value || '', idCompra);
+    this.comprasService.deleteCompra(this.userId.value || '', idCompra).subscribe((res) => {
+      this.buscarTodos();
+    });
   }
 
   editarCompra(idCompra: string) {
-    this.comprasService.getCompra(this.userId.value || '', idCompra);
-    this.compra$ = this.comprasService.compra$;
-    this.nuevaCompraForm.setValue({id: this.compra$()._id || '',
-                                  idArticulo: this.compra$().id_articulo || '', 
-                                  cantidad: this.compra$().cantidad.toString() || '', 
-                                  nombre: this.compra$().nombre || '', 
-                                  direccion: this.compra$().direccion || ''}
-    )
+    this.comprasService.getCompra(this.userId.value || '', idCompra).subscribe( res => {
+      this.userId.setValue(res.id_cliente || '');
+      const cantidad = res.cantidad.toString();
+      this.nuevaCompraForm.setValue({id: res._id || '',
+                                  idArticulo: res.id_articulo || '', 
+                                  cantidad: cantidad || '', 
+                                  nombre: res.nombre || '', 
+                                  direccion: res.direccion || ''})
+    });
+    this.userId.disable();
+    this.nuevaCompraForm.controls['cantidad'].disable();
+    this.nuevaCompraForm.controls['idArticulo'].disable();
   }
 
   displayedColumns: string[] = [
@@ -278,13 +309,15 @@ export class ComprasBlockComponent implements OnInit{
 
   nuevaCompraForm = this.formBuilder.group({
     id: ['',[]],
-    idArticulo: ['',Validators.required, Validators.minLength(24), Validators.maxLength(24)],
+    idArticulo: ['',[Validators.required, Validators.minLength(24), Validators.maxLength(24)]],
     cantidad: ['', [Validators.required, Validators.pattern("^[0-9]*$")]],
     nombre: ['',[Validators.required]],
-    direccion: ['', Validators.required]
+    direccion: ['', [Validators.required]]
   })
 
-  constructor(private formBuilder: FormBuilder, private comprasService:CompraService) {
+  constructor(private formBuilder: FormBuilder,
+              private comprasService:CompraService,
+              private sharedService: SharedService) {
     effect(() => {
       this.searchComprasForm.setValue({
         search: '',
@@ -294,11 +327,23 @@ export class ComprasBlockComponent implements OnInit{
 
   }
 
+  clear() {
+    this.nuevaCompraForm.setValue({id: '',
+                                  idArticulo: '',
+                                  cantidad: '',
+                                  nombre: '',
+                                  direccion: ''}
+    )
+    this.nuevaCompraForm.controls['cantidad'].enable();
+    this.nuevaCompraForm.controls['idArticulo'].enable();
+    this.userId.enable();
+  }
+
   get search() {
     return this.searchComprasForm.get('search')!;
   }
   get searchBy() {
-    return this.nuevaCompraForm.get('searchBy')!;
+    return this.searchComprasForm.get('searchBy')!;
   }
   get id() {
     return this.nuevaCompraForm.get('id')!;

@@ -1,4 +1,4 @@
-import { Component, effect, WritableSignal  } from '@angular/core';
+import { Component, effect, OnInit, WritableSignal  } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CompraService } from '../compra.service';
+import { SharedService } from '../shared.service'
 import { Zapato } from '../zapato'
 
 @Component({
@@ -53,6 +54,13 @@ import { Zapato } from '../zapato'
         Buscar
       </button>
     </form>
+    <button
+        mat-raised-button
+        color="primary"
+        (click)="fetchZapatos()"
+      >
+        Buscar Todos
+      </button>
   </mat-card>
 
   <mat-card class="side-table">
@@ -130,22 +138,31 @@ import { Zapato } from '../zapato'
     }
   `
 })
-export class ArticulosBlockComponent {
+export class ArticulosBlockComponent implements OnInit {
 
   zapatos$ = {} as WritableSignal<Zapato[]>;
 
-  private fetchZapatos(): void {
+  userId = '';
+
+  fetchZapatos(): void {
     this.zapatos$ = this.compraService.zapatos$;
-    this.compraService.getZapatos("SAMPLE_ID");
+    this.compraService.getZapatos(this.userId);
   }
 
   comprarZapato(id: string) {
+    this.sharedService.setProductId(id);
+  }
 
+  ngOnInit(): void {
+    this.zapatos$ = this.compraService.zapatos$;
+    this.sharedService.idUserMessage.subscribe(
+      (msg) => {this.userId = msg;}
+    );
   }
 
   submitForm() {
     this.zapatos$ = this.compraService.zapatos$;
-    this.compraService.searchZapatos("SAMPLE_ID",this.searchBy.value||'', this.search.value||'');
+    this.compraService.searchZapatos(this.userId,this.searchBy.value||'', this.search.value||'');
   }
 
   displayedColumns: string[] = [
@@ -163,7 +180,9 @@ export class ArticulosBlockComponent {
     searchBy: ['id',[Validators.required]],
   });
 
-  constructor(private formBuilder: FormBuilder, private compraService: CompraService) {
+  constructor(private formBuilder: FormBuilder,
+              private compraService: CompraService,
+              private sharedService: SharedService) {
     effect(() => {
       this.searchArticulosForm.setValue({
         search: '',

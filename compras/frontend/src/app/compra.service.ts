@@ -12,7 +12,6 @@ export class CompraService {
   constructor(private httpClient: HttpClient) { }
   
   compras$ = signal<Compra[]>([]);
-  compra$ = signal<Compra>({} as Compra);
   zapatos$ = signal<Zapato[]>([]);
 
   getZapatos(id: string) {
@@ -42,27 +41,23 @@ export class CompraService {
     this.httpClient.get<Compra[]>(`${this.url}/compras/${id}/${param}/${value}`)
     .subscribe(compras => {
       this.compras$.set(compras);
-      return this.compras$();
     });
   }
 
   getCompra(id: string, idCompra: string) {
-    this.httpClient.get<Compra>(`${this.url}/compras/${id}/${idCompra}`).subscribe(compra => {
-      this.compra$.set(compra);
-      return this.compra$();
-    });
+    return this.httpClient.get<Compra>(`${this.url}/compras/${id}/${idCompra}`)
   }
 
   createCompra(id: string, compra: Compra) {
-    return this.httpClient.post(`${this.url}/compras/${id}`, compra, { responseType: 'text' });
+    return this.httpClient.post(`${this.url}/compras/${id}`, compra, { responseType: 'text' })
   }
 
   updateCompra(id: string, idCompra: string, compra: Compra) {
-    return this.httpClient.put(`${this.url}/compras/${id}/${idCompra}`, compra, { responseType: 'text' });
+    return this.httpClient.put(`${this.url}/compras/${id}/${idCompra}`, compra, { responseType: 'text' })
   }
 
   deleteCompra(id: string, idCompra: string) {
-    return this.httpClient.delete(`${this.url}/employees/${id}/${idCompra}`, { responseType: 'text' });
+    return this.httpClient.delete(`${this.url}/compras/${id}/${idCompra}`, { responseType: 'text' })
   }
   
 }

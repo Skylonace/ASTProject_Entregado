@@ -6,10 +6,6 @@ const Zapato = require('../models/Zapato')
 
 
 function isForbidden(id) {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
-        return;
-    }
     if(id.toString().toLowerCase().charAt(0) == 'c') {
         return false;
     } else {
@@ -31,20 +27,27 @@ comprasCtrl.searchZapatos = async (req, res) => {
         res.send({message: "Operación no permitida"});
         return;
     }
-    if(req.params.param == "marca") {
-        const zapato = await Zapato.find({marca : req.params.value});
-        res.send(zapato);
-    } else if(req.params.param == "tipo") {
-        const zapato = await Zapato.find({tipo : req.params.value});
-        res.send(zapato);
-    } else if(req.params.param == "talla") {
-        const zapato = await Zapato.find({talla : req.params.value});
-        res.send(zapato);
-    } else if(req.params.param == "id") {
-        const zapato = await Zapato.findById(req.params.value);
-        res.send(zapato);
-    } else {
-        res.send({message: "Categoria no permitida"})
+    try{
+        if(req.params.param == "marca") {
+            const zapato = await Zapato.find({marca : req.params.value});
+            res.send(zapato);
+        } else if(req.params.param == "tipo") {
+            const zapato = await Zapato.find({tipo : req.params.value});
+            res.send(zapato);
+        } else if(req.params.param == "talla") {
+            const curTalla = int(req.params.value);
+            const zapato = await Zapato.find({talla : curTalla});
+            res.send(zapato);
+        } else if(req.params.param == "id") {
+            console.log(req.params.value);
+            const zapato = await Zapato.find({_id : req.params.value});
+            res.send(zapato);
+        } else {
+            res.send([])
+        }
+    } catch(error) {
+        console.log(error)
+        res.send([])
     }
 };
 
@@ -58,27 +61,33 @@ comprasCtrl.getCompras = async(req, res) => {
 }
 
 comprasCtrl.searchCompras = async(req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
-        return;
-    }
-    if(req.params.param == "id_articulo") {
-        const compras = await Compra.find({id_articulo : req.params.value});
-        res.send(compra);
-    } else if(req.params.param == "id_cliente") {
-        const compras = await Compra.find({id_cliente : req.params.value});
-        res.send(compras);
-    } else if(req.params.param == "nombre") {
-        const compras = await Compra.find({nombre : req.params.value});
-        res.send(compras);
-    } else if(req.params.param == "direccion") {
-        const compras = await Compra.find({direccion : req.params.value});
-        res.send(compras);
-    } else if(req.params.param == "id") {
-        const compras = await Compra.findById(req.params.value);
-        res.send(compras);
-    } else {
-        res.send({message: "Categoria no permitida"});
+    try{
+        if(isForbidden(req.params.id)) {
+            res.send({message: "Operación no permitida"});
+            return;
+        }
+        if(req.params.param == "id_articulo") {
+            const compras = await Compra.find({id_articulo : req.params.value});
+            res.send(compras);
+        } else if(req.params.param == "id_cliente") {
+            const compras = await Compra.find({id_cliente : req.params.value});
+            res.send(compras);
+        } else if(req.params.param == "nombre") {
+            const compras = await Compra.find({nombre : req.params.value});
+            res.send(compras);
+        } else if(req.params.param == "direccion") {
+            const compras = await Compra.find({direccion : req.params.value});
+            res.send(compras);
+        } else if(req.params.param == "id") {
+            console.log(req.params.value);
+            const compras = await Compra.find({_id : req.params.value});
+            res.send(compras);
+        } else {
+            res.send([])
+        }
+    } catch(error) {
+        console.log(error)
+        res.send([])
     }
 }
 
@@ -98,7 +107,7 @@ comprasCtrl.createCompra = async(req, res) => {
     }
     const newCompra = new Compra(req.body);
     affectedProduct = await Zapato.findById(newCompra.id_articulo);
-    if(affectedProduct.cantidad > newCompra.cantidad) {
+    if(affectedProduct.cantidad < newCompra.cantidad) {
         res.send({message: "Excessive quantity"});
         return;
     }

@@ -12,6 +12,6 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false}));
 
-app.use("/api/compras",require('./routes/compras.routes'))
+app.use("/",require('./routes/compras.routes'))
 
 module.exports = app;
