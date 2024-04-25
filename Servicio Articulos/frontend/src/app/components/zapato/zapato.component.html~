@@ -1,0 +1,100 @@
+
+
+<div class="row">
+	<div class="col-md-4">
+		<div class="card">
+			<div class="card-body">
+				<form #zapatoForm="ngForm">
+				
+					<input type="hidden" name="_id" [(ngModel)]="zapatoService.selectedZapato._id">
+					<div class="form-group">
+					<label for="marca">Marca:</label>
+					<input  type="text" id="marca" name="marca"  class="form-control" placeholder="Introduce tu marca" [(ngModel)]="zapatoService.selectedZapato.marca"/>
+					</div>
+					<div class="form-group">
+					<label for="talla">Talla:</label>
+						<input type="number" id="talla" name= "talla" class="form-control" placeholder="Introduce tu talla" [(ngModel)]="zapatoService.selectedZapato.talla"/>
+					</div>
+					<div class="form-group">	
+					<label for="tipo">Tipo:</label>
+						<input type="text" id="tipo" name= "tipo" class="form-control" placeholder="Introduce el tipo" [(ngModel)]="zapatoService.selectedZapato.tipo"/>
+					</div>
+					 <div class="form-group">
+                                        <label for="cantidad">Cantidad:</label>
+                                                <input type="number" id="cantidad" name="cantidad" class="form-control" placeholder="Introduce la cantidad" [(ngModel)]="zapatoService.selectedZapato.cantidad">
+                                        </div>
+
+					<div class="form-group">
+					<label for="precio">Precio:</label>
+						<input type="number" id="precio" name= "precio" class="form-control" placeholder="Introduce el precio" [(ngModel)]="zapatoService.selectedZapato.precio"/>
+					</div>
+				<div><input type="submit" class="btn btn-primary" value="Save" (click)="addZapato(zapatoForm)">
+				<button class="btn btn-secondary mr-2" (click)="resetForm(zapatoForm)">
+                                        Clean
+                                </button>
+				</div>
+				<br>
+				<div>
+					<label for="searchSelect">Selecciona parametro para la busqueda:</label>
+			                <select name="searchSelect" id="searchSelect" class="form-control" [(ngModel)]="searchOption">
+                        		        <option *ngFor="let o of optionsSelect">
+							{{o.name}}
+						</option>
+			                </select>
+					<input type="text" id="dataSelect" name="dataSelect" class="form-control" [(ngModel)]="searchData" placeholder="Introduce valor para la busqueda">
+					<button type="submit" class="btn btn-primary mr-2" (click)="searchForm(zapatoForm)">
+						Search
+					</button>
+
+		                </div>
+
+				</form>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="col-md-4">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>
+						ID
+					</th>
+					<th>
+						Marca
+					</th>
+					<th>
+						Talla
+					</th>
+					<th>
+						Tipo
+					</th>
+					<th>
+						Precio
+					</th>
+					<th>
+						Cantidad
+					</th>
+				</tr>
+			</thead>
+		<tbody>
+			<tr *ngFor = "let zapato of zapatoService.zapatos">
+				<td>{{zapato._id}}</td>
+                                <td>{{zapato.marca}}</td>
+                                <td>{{zapato.talla}}</td>
+                                <td>{{zapato.tipo}}</td>
+				<td>{{zapato.precio}}</td>
+				<td>{{zapato.cantidad}}</td>
+                                <td>
+                                        <button class= "btn btn-secondary btn-sm" (click)="editZapato(zapato)">Edit</button>
+                                        <button class= "btn btn-danger btn-sm" (click)="deleteZapato(zapato._id)">Delete</button>
+				</td>
+
+                        </tr>
+
+		</tbody>
+		</table>
+	</div>
+
+</div>
