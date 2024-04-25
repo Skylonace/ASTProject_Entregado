@@ -1,21 +1,31 @@
 
 const comprasCtrl = {}
 
-const Compra = require('../models/Compra')
-const Zapato = require('../models/Zapato')
-
+const http = require('http');
+const Compra = require('../models/Compra');
+const Zapato = require('../models/Zapato');
 
 function isForbidden(id) {
-    if(id.toString().toLowerCase().charAt(0) == 'c') {
-        return false;
-    } else {
-        return true;
-    }
+    return new Promise ((resolve, reject) => {
+        http.get("http://localhost:4100/api/usuarios/clase/" + id, res => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk});
+            res.on('end', () => {
+                tipo = data;
+                console.log(data);
+                resolve(!(data == 'Cliente'));
+            })
+            res.on('error', err => {
+                reject(err);
+              });
+            
+        });
+    })
 }
 
 comprasCtrl.getZapatos = async (req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
+    if(await isForbidden(req.params.id)) {
+        res.send([]);
         return;
     }
     const zapatos = await Zapato.find();
@@ -23,8 +33,8 @@ comprasCtrl.getZapatos = async (req, res) => {
 };
 
 comprasCtrl.searchZapatos = async (req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
+    if(await isForbidden(req.params.id)) {
+        res.send([]);
         return;
     }
     try{
@@ -52,8 +62,8 @@ comprasCtrl.searchZapatos = async (req, res) => {
 };
 
 comprasCtrl.getCompras = async(req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
+    if(await isForbidden(req.params.id)) {
+        res.send([]);
         return;
     }
     const compras = await Compra.find({id_cliente: req.params.id})
@@ -62,8 +72,8 @@ comprasCtrl.getCompras = async(req, res) => {
 
 comprasCtrl.searchCompras = async(req, res) => {
     try{
-        if(isForbidden(req.params.id)) {
-            res.send({message: "Operación no permitida"});
+        if(await isForbidden(req.params.id)) {
+            res.send([]);
             return;
         }
         if(req.params.param == "id_articulo") {
@@ -92,8 +102,8 @@ comprasCtrl.searchCompras = async(req, res) => {
 }
 
 comprasCtrl.getCompra = async(req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
+    if(await isForbidden(req.params.id)) {
+        res.send([]);
         return;
     }
     const compra = await Compra.findById(req.params.idCompra);
@@ -101,8 +111,8 @@ comprasCtrl.getCompra = async(req, res) => {
 }
 
 comprasCtrl.createCompra = async(req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
+    if(await isForbidden(req.params.id)) {
+        res.send([]);
         return;
     }
     const newCompra = new Compra(req.body);
@@ -118,8 +128,8 @@ comprasCtrl.createCompra = async(req, res) => {
 }
 
 comprasCtrl.updateCompra = async(req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
+    if(await isForbidden(req.params.id)) {
+        res.send([]);
         return;
     }
     await Compra.findByIdAndUpdate(req.params.idCompra, req.body)
@@ -127,8 +137,8 @@ comprasCtrl.updateCompra = async(req, res) => {
 }
 
 comprasCtrl.deleteCompra = async(req, res) => {
-    if(isForbidden(req.params.id)) {
-        res.send({message: "Operación no permitida"});
+    if(await isForbidden(req.params.id)) {
+        res.send([]);
         return;
     }
     deletedCompra = await Compra.findByIdAndDelete(req.params.idCompra);
