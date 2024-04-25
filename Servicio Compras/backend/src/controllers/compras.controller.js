@@ -77,7 +77,7 @@ comprasCtrl.searchCompras = async(req, res) => {
             return;
         }
         if(req.params.param == "id_articulo") {
-            const compras = await Compra.find({id_articulo : req.params.value});
+            const compras = await Compra.find({id_articulo : req.params.value, id_cliente : req.params.id});
             res.send(compras);
         } else if(req.params.param == "id_cliente") {
             const compras = await Compra.find({id_cliente : req.params.value});
